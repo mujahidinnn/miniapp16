@@ -23,9 +23,10 @@ form.form-auth {
   display: flex;
   flex-direction: column;
   width: 500px;
-  height: 500px;
+  height: 100%;
   padding: 15px;
   margin-left: 37vw;
+  overflow-y: auto;
 }
 form.form {
   border-radius: 12px;
@@ -37,8 +38,9 @@ form.form {
   height: 800px;
   padding: 15px;
 }
+
 label {
-  text-align:left;
+  text-align: left;
 }
 input {
   background-color: #f6f6f6;
@@ -66,7 +68,7 @@ span {
   color: #0038ff;
 }
 
-.search{
+.search {
   /* height:20px; */
 }
 /* card */
@@ -177,13 +179,13 @@ img.img-preview {
 
 .container-home {
   margin-bottom: 10vh;
-  width: 90%;
+  width: 69vw;
 }
 .home-head {
   display: flex;
   justify-content: space-between;
   padding: 20px 0;
-}
+} 
 .loading {
   display: flex;
   justify-content: center;
@@ -194,7 +196,22 @@ img.img-preview {
 h2 {
   text-transform: capitalize;
 }
-.toggle{
+.toggle {
   cursor: pointer;
   text-decoration: underline;
+}
+
+.animate-spinner {
+  width: 100px;
+  height: 100px;
+  border: 10px solid #ccc;
+  border-top-color: #6889ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

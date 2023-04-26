@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DebounceInput } from "react-debounce-input";
 import { useNavigate } from "react-router-dom";
-import instance from "../api/request";
+import { request } from "../utils/request";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -21,17 +21,8 @@ const Home = () => {
   useEffect(() => {
     setLoading(true);
     const getData = () => {
-      let config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: "/index",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      };
-
-      instance
-        .request(config)
+      request
+        .get("/index")
         .then((response) => {
           setLoading(false);
           setData(response.data.data.reverse());
@@ -56,6 +47,11 @@ const Home = () => {
         <h1>Loading . . .</h1>
       </div>
     );
+  }
+  if (data.length < 1) {
+    <div className="loading">
+      <h1>Data Kosong</h1>
+    </div>;
   } else {
     return (
       <div className="container-home">

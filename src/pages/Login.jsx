@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import instance from "../api/api";
 import { Button, Input } from "../components";
+import { request } from "../utils/request";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberme, setRememberme] = useState(false);
   const [show, setShow] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const dataUser = sessionStorage.getItem("dataUser");
+    if (dataUser) {
+      const { email, password, rememberme } = JSON.parse(dataUser);
+      setEmail(email);
+      setPassword(password);
+      setRememberme(rememberme);
+    }
+  }, []);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -17,26 +27,29 @@ const Login = () => {
     if (email === "" || password === "") {
       return false;
     } else {
+      setLoading(true);
       let data = new FormData();
       data.append("email", email);
       data.append("password", password);
 
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "/login",
-        headers: {},
-        data: data,
-      };
-
-      instance
-        .request(config)
+      request
+        .post("/login", data)
         .then((response) => {
+          setLoading(false);
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("name-user", response.data.user.name);
+          if (rememberme) {
+            sessionStorage.setItem(
+              "dataUser",
+              JSON.stringify({ email, password, rememberme })
+            );
+          } else {
+            sessionStorage.removeItem("dataUser");
+          }
           navigate("/home");
         })
         .catch((error) => {
+          setLoading(false);
           console.log(error);
         });
     }
@@ -62,9 +75,24 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <p onClick={() => setShow(!show)} className="toggle">{show ? "Hide" : "Show"}</p>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", gap: "10px", width: "max-content" }}>
+            <input
+              type="checkbox"
+              name="rememberme"
+              id="rememberme"
+              onChange={(e) => setRememberme(e.target.checked)}
+              checked={rememberme}
+              style={{ width: "20px", height: "20px" }}
+            />
+            <label htmlFor="rememberme">Ingat saya</label>
+          </div>
+          <p onClick={() => setShow(!show)} className="toggle">
+            {show ? "Hide" : "Show"}
+          </p>
+        </div>
         <Button
-          title="Login"
+          title={loading ? "Loading..." : "Login"}
           onClick={handleSubmit}
           type="submit"
           className="btn-primary"

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import instance from "../api/api";
-import { Input, Button } from "../components";
+import { Button, Input } from "../components";
+import { request } from "../utils/request";
 
 const Update = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const fileChangeHandler = (e) => {
     setPhoto(e.target.files[0]);
     setImage(URL.createObjectURL(e.target.files[0]));
@@ -24,23 +25,16 @@ const Update = () => {
 
   useEffect(() => {
     function getData() {
-      let config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: `/show/${id}`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      };
-      instance
-        .request(config)
+      request
+        .get(`/show/${id}`)
         .then((response) => {
-          setName(response.data.data[0].name);
-          setEmail(response.data.data[0].email);
-          setPhone(response.data.data[0].phone);
-          setAddress(response.data.data[0].address);
-          setCity(response.data.data[0].city);
-          setPhoto(response.data.data[0].photo);
+          const res = response?.data?.data[0];
+          setName(res?.name);
+          setEmail(res?.email);
+          setPhone(res?.phone);
+          setAddress(res?.address);
+          setCity(res?.city);
+          setPhoto(res?.photo);
         })
         .catch((error) => {
           console.log(error);
@@ -51,9 +45,9 @@ const Update = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    setLoading(true);
     let data = new FormData();
-    if (image !==null) {
+    if (image !== null) {
       data.append("photo", photo);
     }
     data.append("name", name);
@@ -62,31 +56,25 @@ const Update = () => {
     data.append("address", address);
     data.append("city", city);
 
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: `/UP/${id}`,
-      headers: {
-        "Content-Type": "multipart/formdata",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      data: data,
-    };
-
-    instance
-      .request(config)
-      .then((res) => {
-        console.log(res);
+    request
+      .post(`/UP/${id}`, data, {
+        headers: {
+          "Content-Type": "multipart/formdata",
+        },
+      })
+      .then(() => {
+        setLoading(false);
         navigate("/home/tabel");
       })
       .catch((error) => {
+        setLoading(false);
         console.log(error);
       });
   };
 
   return (
     <div>
-      <h1>➕ Update</h1>
+      <h1>Update</h1>
       <form onSubmit={handleSubmit} className="form">
         <Input
           label="Nama Wisata"
@@ -139,7 +127,11 @@ const Update = () => {
           id="input-file"
           onChange={fileChangeHandler}
         />
-        <Button title="Update" type="submit" className="btn-primary" />
+        <Button
+          title={loading ? "Updating..." : "Update"}
+          type="submit"
+          className="btn-primary"
+        />
       </form>
     </div>
   );

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import instance from "../api/api";
-import {Input,Button} from "../components"
+import { Button, Input } from "../components";
+import { request } from "../utils/request";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [password_confirmation, setPassword_confirmation] = useState("");
-  const [show,setShow]=useState(false)
+  const [show, setShow] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,16 +29,8 @@ const Register = () => {
       data.append("password", password);
       data.append("password_confirmation", password_confirmation);
 
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "/register",
-        headers: {},
-        data: data,
-      };
-
-      instance
-        .request(config)
+      request
+        .post("/register", data)
         .then((response) => {
           console.log(JSON.stringify(response.data));
           navigate("/");
